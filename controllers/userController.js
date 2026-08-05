@@ -1,124 +1,190 @@
 
 import User from "../models/User.js";
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
-// Register Users
-
-export const register = async (req, res) => {
+export const getUsers = async (req, res) => {
     try {
-        const { name, email, mobile, password, role } = req.body;
-        if (!name || !email || !mobile || !password || !role) {
-            return res.status(400).json({
-                success: false,
-                message: "Fill the all fields required"
-            })
-        }
-
-        const EmailIdAlready = await User.findOne({ email });
-        if (EmailIdAlready) {
-            return res.status(401).json({
-                status: false,
-                message: "Email id Already exits"
-            })
-        }
-
-        const MobileUnique = await User.findOne({ mobile });
-        if (MobileUnique) {
-            return res.status(401).json({
-                status: false,
-                message: "Mobile number Already exits"
-            })
-        }
-
-        const hashPassword = await bcrypt.hash(password, 10);
-
-        const user = await User.create({
-            name,
-            email,
-            password: hashPassword,
-            role,
-            mobile
-        });
-
-        res.status(201).json({
-            status: "success",
-            message: "Create the user successfully",
-            data: user
-        })
-    } catch (error) {
-        res.status(400).json({
-            status: "Error",
-            message: error.message
-        })
-    }
-
-}
-
-export const login = async (req, res) => {
-    try {
-        const { email, password, role } = req.body;
-        if (!email || !password || !role) {
-            return res.status(401).json({
-                success: false,
-                message: "All Field required please fill me"
-            });
-        }
-
-        // find the email 
-
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "Invaild email and password"
-            });
-        }
-
-        // Compare password 
-        const PasswordMatched = await bcrypt.compare(password, user.password);
-        if (!PasswordMatched) {
-            return res.status(401).json({
-                success: false,
-                message: "Incorrect password"
-            });
-        }
-
-        // check role
-        if (user.role !== role) {
-            return res.status(403).json({
-                success: false,
-                message: "Invaild role"
-            });
-        }
-
-        // Generate JWT
-        const token = jwt.sign(
-            {
-                id: user._id,
-                role: user.role
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "7d"
-            }
-        );
-
-        res.status(200).json({
+        const users = await User.find();
+        res.json({
             success: true,
-            message: "Login successfully",
-            token,
-            user
+            message: "All users fetched successfully",
+            data: users
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "Error fetching users"
         });
     }
 }
 
-export const profile = async (req, res) => {
-    console.log("profile");
+export const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User fetched successfully",
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching user"
+        });
+    }
+}
+
+export const createUser = async (req, res) => {
+    try {
+        const newUser = new User(req.body);
+        await newUser.save();
+        res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            data: newUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error creating user"
+        });
+    }
+}
+
+export const updateUser = async (req, res) => {
+    try {
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User updated successfully",
+            data: updatedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error updating user"
+        });
+    }
+}
+
+export const deleteUser = async (req, res) => {
+    try {
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
+        if (!deletedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User deleted successfully",
+            data: deletedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error deleting user"
+        });
+    }
+}
+
+export const blockUser = async (req, res) => {
+    try {
+        const blockedUser = await User.findByIdAndUpdate(req.params.id, { isBlocked: true }, { new: true });
+        if (!blockedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User blocked successfully",
+            data: blockedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error blocking user"
+        });
+    }
+}
+
+export const unblockUser = async (req, res) => {
+    try {
+        const unblockedUser = await User.findByIdAndUpdate(req.params.id, { isBlocked: false }, { new: true });
+        if (!unblockedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User unblocked successfully",
+            data: unblockedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error unblocking user"
+        });
+    }
+}
+
+export const changeUserRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User role updated successfully",
+            data: updatedUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error updating user role"
+        });
+    }
+}
+
+export const getUserDashboard = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            message: "User dashboard fetched successfully",
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching user dashboard"
+        });
+    }
 }

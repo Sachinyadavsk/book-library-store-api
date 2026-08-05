@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v2/users", userRouters);
-app.use("/api/v2/admin", authRoutes);
+app.use("/api/v2/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

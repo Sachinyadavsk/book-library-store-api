@@ -1,17 +1,39 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const categorySchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, "Please provide the name of the category"],
+const categorySchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            unique: true,
+            trim: true,
+        },
+        slug: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+        description: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        image: {
+            type: String,
+            default: "",
+        },
+        status: {
+            type: Boolean,
+            default: true,
+        },
     },
-    description: {
-        type: String,
-        required: [true, "Please provide the description of the category"],
+    {
+        timestamps: true,
     }
-}, {
-    timestamps: true,
-});
+);
 
 const Category = mongoose.model("Category", categorySchema);
+
 export default Category;

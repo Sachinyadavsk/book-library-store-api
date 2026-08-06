@@ -1,4 +1,4 @@
-import Review from '../models/reviewModel.js';
+import Review from '../models/Review.js';
 
 export const getReviews = async (req, res) => {
     try {

@@ -1,30 +1,113 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "Please provide the user of the order"],
-    },
-    items: [{
-        book: {
+const orderSchema = new mongoose.Schema(
+    {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Book",
-            required: [true, "Please provide the book in the order"],
+            ref: "User",
+            required: true,
         },
-        quantity: {
+
+        items: [
+            {
+                book: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Book",
+                    required: true,
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                    min: 1,
+                    default: 1,
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                }
+            }
+        ],
+
+        subtotal: {
             type: Number,
-            required: [true, "Please provide the quantity of the book in the order"],
-            min: [1, "Quantity must be at least 1"],
+            required: true,
+        },
+
+        discount: {
+            type: Number,
+            default: 0,
+        },
+
+        tax: {
+            type: Number,
+            default: 0,
+        },
+
+        shippingCharge: {
+            type: Number,
+            default: 0,
+        },
+
+        totalAmount: {
+            type: Number,
+            required: true,
+        },
+
+        paymentMethod: {
+            type: String,
+            enum: ["COD", "Online", "UPI", "Card", "Net Banking"],
+            default: "COD",
+        },
+
+        paymentStatus: {
+            type: String,
+            enum: ["Pending", "Paid", "Failed", "Refunded"],
+            default: "Pending",
+        },
+
+        orderStatus: {
+            type: String,
+            enum: [
+                "Pending",
+                "Confirmed",
+                "Processing",
+                "Shipped",
+                "Delivered",
+                "Cancelled"
+            ],
+            default: "Pending",
+        },
+
+        shippingAddress: {
+            fullName: String,
+            mobile: String,
+            address: String,
+            city: String,
+            state: String,
+            country: String,
+            postalCode: String,
+        },
+
+        invoiceNumber: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
+
+        trackingNumber: {
+            type: String,
+            default: "",
+        },
+
+        deliveredAt: {
+            type: Date,
         }
-    }],
-    totalAmount: {
-        type: Number,
-        required: [true, "Please provide the total amount of the order"],
+    },
+    {
+        timestamps: true,
     }
-}, {
-    timestamps: true,
-});
+);
 
 const Order = mongoose.model("Order", orderSchema);
+
 export default Order;

@@ -1,21 +1,26 @@
 import mongoose from "mongoose";
 
-const wishlistSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "Please provide the user of the wishlist"],
-    },
-    items: [{
+const wishlistSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
         book: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Book",
-            required: [true, "Please provide the book in the wishlist"],
-        }
-    }],
-}, {
-    timestamps: true,
-});
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
+
+// Prevent duplicate wishlist entries for the same user and book
+wishlistSchema.index({ user: 1, book: 1 }, { unique: true });
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);
+
 export default Wishlist;

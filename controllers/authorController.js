@@ -40,8 +40,8 @@ export const getAuthorById = async (req, res) => {
 
 export const createAuthor = async (req, res) => {
     try {
-        const { name, bio } = req.body;
-        const newAuthor = new Author({ name, bio });
+        const { name, bio, slug } = req.body;
+        const newAuthor = new Author({ name, bio, slug });
         await newAuthor.save();
         res.status(201).json({
             success: true,

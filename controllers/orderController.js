@@ -38,14 +38,40 @@ export const getOrderById = async (req, res) => {
 
 export const createOrder = async (req, res) => {
     try {
-        const { userId, products, totalAmount } = req.body;
-        const newOrder = new Order({ userId, products, totalAmount });
-        await newOrder.save();
+        const {
+            items,
+            discount = 0,
+            tax = 0,
+            shippingCharge = 0,
+            paymentMethod,
+            shippingAddress
+        } = req.body;
+
+        const subtotal = items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+        );
+
+        const totalAmount =
+            subtotal - discount + tax + shippingCharge;
+
+        const order = await Order.create({
+            user: req.user._id,
+            items,
+            subtotal,
+            discount,
+            tax,
+            shippingCharge,
+            totalAmount,
+            paymentMethod,
+            shippingAddress
+        });
+
         res.status(201).json({
             success: true,
-            message: "Order created successfully",
-            order: newOrder
+            data: order
         });
+
     } catch (error) {
         res.status(500).json({
             success: false,

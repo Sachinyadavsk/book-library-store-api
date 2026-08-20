@@ -21,7 +21,15 @@ import wishlistRoutes from './routes/wishlistRoutes.js'
 
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(
+    cors({
+        origin: [
+            "http://localhost:5173",
+            "https://book-library-store.vercel.app",
+        ],
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Book Library Store API");
